@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Link não listado: pede aos buscadores para não indexar o jogo -->
+  <meta name="robots" content="noindex, nofollow">
+  <title>Operação Oceano: Guardião do Recife</title>
+  <link rel="icon" href="assets/images/oxygen-bubble.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <main class="app">
+    <div id="game-container" class="game-container" tabindex="-1">
+      <canvas id="game-canvas" width="960" height="540" role="img"
+        aria-label="Cenário submarino do jogo Operação Oceano: o mergulhador recolhe resíduos, bolhas de oxigênio e resgata uma tartaruga, evitando águas-vivas."></canvas>
+
+      <!-- HUD: visível durante a partida e a pausa -->
+      <div id="hud" class="hud" hidden>
+        <div class="hud-group">
+          <div class="hud-panel" title="Vidas">
+            <span class="hearts" aria-hidden="true"><span class="heart">♥</span><span class="heart">♥</span><span
+                class="heart">♥</span></span>
+            <span class="sr-label">Vidas:</span> <strong id="hud-lives-text">3/3</strong>
+          </div>
+          <div class="hud-panel hud-oxygen">
+            <span class="hud-label">O₂</span>
+            <div id="hud-oxygen-bar" class="oxygen-bar" role="progressbar" aria-label="Oxigênio em segundos"
+              aria-valuemin="0" aria-valuemax="60" aria-valuenow="60">
+              <div id="hud-oxygen-fill" class="oxygen-fill"></div>
+            </div>
+            <strong id="hud-oxygen-text" class="oxygen-text">60 s</strong>
+          </div>
+        </div>
+        <div class="hud-group">
+          <div class="hud-panel"><span class="hud-label">Fase</span> <strong id="hud-level">1/4</strong></div>
+          <div class="hud-panel"><span class="hud-label">Pontos</span> <strong id="hud-score" class="accent">0</strong>
+          </div>
+          <div class="hud-panel"><span class="hud-label">Resíduos</span> <strong id="hud-trash">0/12</strong></div>
+          <div class="hud-panel"><span class="hud-label">Tartaruga</span> <strong id="hud-turtle">pendente</strong>
+          </div>
+          <button type="button" class="hud-pause" data-action="pause" aria-label="Pausar o jogo">❚❚ Pausar</button>
+        </div>
+      </div>
+
+      <!-- Menu inicial -->
+      <section class="overlay overlay-menu" data-screen="menu" aria-labelledby="menu-title">
+        <div class="panel panel-menu">
+          <h1 id="menu-title" class="game-title">
+            <span class="title-small">Operação</span>
+            <span class="title-big">Oceano</span>
+            <span class="title-ribbon">Guardião do Recife</span>
+          </h1>
+          <p class="tagline">Recolha o lixo do recife, resgate a tartaruga e volte antes que o oxigênio acabe!</p>
+          <div class="button-column">
+            <button type="button" id="play-button" class="btn btn-primary" data-action="play">Jogar</button>
+            <button type="button" class="btn" data-action="instructions">Como Jogar</button>
+            <button type="button" class="btn" data-action="credits">Créditos</button>
+          </div>
+          <p id="loading-status" class="loading-status" role="status"></p>
+        </div>
+      </section>
+
+      <!-- Como jogar -->
+      <section class="overlay" data-screen="instructions" aria-labelledby="instructions-title" hidden>
+        <div class="panel panel-wide">
+          <h2 id="instructions-title">Como Jogar</h2>
+          <ul class="instruction-list">
+            <li><span class="keys"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> ou
+                <kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd></span> Nade em qualquer direção.</li>
+            <li><img src="assets/images/plastic-bottle.svg" alt="" width="20" height="36"><img
+                src="assets/images/can.svg" alt="" width="22" height="32">
+              <span><strong>Objetivo:</strong> recolha pelo menos <strong>12 resíduos</strong> (todos os 15 na fase 4;
+                garrafa +10, sacola +15, lata +20) e encoste na <strong>tartaruga</strong> para resgatá-la
+                (+100).</span>
+            </li>
+            <li><img src="assets/images/oxygen-bubble.svg" alt="" width="32" height="32">
+              <span><strong>Oxigênio:</strong> você tem 60 segundos na fase 1, 40 na fase 2 e 30 nas fases 3 e 4. Cada
+                bolha de O₂ devolve 12 segundos (6 na fase 3; a fase 4 não tem bolhas). As bolhas somem depois de alguns
+                segundos!</span>
+            </li>
+            <li><img src="assets/images/jellyfish.svg" alt="" width="28" height="36">
+              <span><strong>Vidas:</strong> você começa com 3. Encostar em uma água-viva tira uma vida. Com o tempo,
+                elas ficam mais rápidas.</span>
+            </li>
+            <li><img src="assets/images/turtle.svg" alt="" width="36" height="24">
+              <span><strong>Fases:</strong> são 4. Na fase 2 a tartaruga nada pelo recife — alcance-a! Na fase 3 ela
+                nada mais rápido, há 6 águas-vivas e elas ficam mais agitadas na metade do oxigênio. Na fase 4 surge a
+                <strong>água-viva mãe</strong>: gigante, rápida, e um único toque acaba com todas as suas vidas! A
+                pontuação é acumulada.</span>
+            </li>
+            <li><span class="keys"><kbd>P</kbd> ou <kbd>Esc</kbd></span> Pausa e retoma a partida.</li>
+          </ul>
+          <p class="note">Você perde se as vidas ou o oxigênio chegarem a zero antes de completar a missão.</p>
+          <button type="button" class="btn" data-action="back">Voltar</button>
+        </div>
+      </section>
+
+      <!-- Créditos (edite os dados de autoria abaixo) -->
+      <section class="overlay" data-screen="credits" aria-labelledby="credits-title" hidden>
+        <div class="panel">
+          <h2 id="credits-title">Créditos</h2>
+          <dl class="credits-list">
+            <dt>Desenvolvimento</dt>
+            <dd>Kenzo</dd>
+            <dt>Disciplina</dt>
+            <dd>Projeto final — Desenvolvimento de Jogos com HTML, CSS e JavaScript</dd>
+            <dt>Arte</dt>
+            <dd>Sprites originais em SVG e cenário desenhado no Canvas 2D</dd>
+            <dt>Tecnologias</dt>
+            <dd>HTML5, CSS3 e JavaScript puro (Canvas 2D)</dd>
+          </dl>
+          <button type="button" class="btn" data-action="back">Voltar</button>
+        </div>
+      </section>
+
+      <!-- Pausa -->
+      <section class="overlay overlay-dim" data-screen="paused" aria-labelledby="pause-title" hidden>
+        <div class="panel">
+          <h2 id="pause-title">Jogo pausado</h2>
+          <p>Respire fundo, mergulhador!</p>
+          <div class="button-column">
+            <button type="button" class="btn btn-primary" data-action="resume">Continuar</button>
+            <button type="button" class="btn" data-action="restartLevel">Reiniciar fase</button>
+            <button type="button" class="btn" data-action="menu">Menu principal</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Fase concluída (ainda há próxima fase) -->
+      <section class="overlay overlay-dim" data-screen="levelComplete" aria-labelledby="level-complete-title" hidden>
+        <div class="panel panel-victory">
+          <h2 id="level-complete-title" class="result-title victory">Fase concluída!</h2>
+          <p>A tartaruga está a salvo. Mas o recife ainda precisa de você!</p>
+          <p class="final-score">Pontuação: <strong id="level-complete-score">0</strong></p>
+          <p id="level-complete-next" class="note"></p>
+          <div class="button-column">
+            <button type="button" class="btn btn-primary" data-action="nextLevel">Próxima fase</button>
+            <button type="button" class="btn" data-action="menu">Menu principal</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Vitória (última fase concluída) -->
+      <section class="overlay overlay-dim" data-screen="victory" aria-labelledby="victory-title" hidden>
+        <div class="panel panel-victory panel-final">
+          <p class="final-badge" aria-hidden="true">🌊🐢🌊</p>
+          <h2 id="victory-title" class="result-title victory final-title">
+            <span class="final-congrats">Parabéns!</span>
+            <span class="final-clean">Oceano limpo!</span>
+          </h2>
+          <p>Você concluiu todas as fases, recolheu o lixo do recife e salvou as tartarugas. O oceano agradece,
+            guardião!</p>
+          <p class="final-score">Pontuação final: <strong id="victory-score">0</strong></p>
+          <p id="victory-details" class="note"></p>
+          <div class="button-column">
+            <button type="button" class="btn btn-primary" data-action="restart">Jogar novamente</button>
+            <button type="button" class="btn" data-action="menu">Menu principal</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Derrota -->
+      <section class="overlay overlay-dim" data-screen="gameOver" aria-labelledby="game-over-title" hidden>
+        <div class="panel panel-defeat">
+          <h2 id="game-over-title" class="result-title defeat">Fim de jogo</h2>
+          <p id="game-over-reason"></p>
+          <p class="final-score">Pontuação final: <strong id="game-over-score">0</strong></p>
+          <div class="button-column">
+            <button type="button" class="btn btn-primary" data-action="restartLevel">Tentar a fase novamente</button>
+            <button type="button" class="btn" data-action="restart">Recomeçar da fase 1</button>
+            <button type="button" class="btn" data-action="menu">Menu principal</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+
+</html>

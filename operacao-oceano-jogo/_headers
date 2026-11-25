@@ -1,0 +1,4 @@
+# Configuração do Netlify: o mesmo pedido de não indexação, enviado no cabeçalho HTTP
+# de todos os arquivos (vale também para imagens, CSS e JS).
+/*
+  X-Robots-Tag: noindex, nofollow

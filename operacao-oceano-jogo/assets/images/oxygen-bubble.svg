@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 72 72">
+  <!-- Bolha de oxigênio original -->
+  <circle cx="36" cy="36" r="32" fill="#1ed6e8" fill-opacity="0.25" stroke="#5ff4ff" stroke-width="4"/>
+  <circle cx="36" cy="36" r="25" fill="none" stroke="#bff9ff" stroke-width="1.5" opacity="0.6"/>
+  <path d="M16 26 Q20 14 32 11" stroke="#ffffff" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <text x="33" y="45" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="bold"
+        fill="#ffffff" text-anchor="middle">O</text>
+  <text x="48" y="51" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="bold"
+        fill="#ffffff" text-anchor="middle">2</text>
+</svg>

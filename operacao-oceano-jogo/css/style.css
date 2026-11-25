@@ -1,0 +1,472 @@
+/* Operação Oceano — layout, HUD, menus e overlays */
+
+:root {
+  --navy-900: #030d22;
+  --navy-800: #071a3b;
+  --navy-700: #0b2a57;
+  --cyan: #4fd8ff;
+  --turquoise: #2ee6c9;
+  --yellow: #ffd84d;
+  --orange: #ff9f43;
+  --coral: #ff6b7a;
+  --green: #8dff7a;
+  --text: #eaf6ff;
+  --text-muted: #a9c6e0;
+  --panel-bg: rgba(4, 18, 44, 0.86);
+  --panel-border: rgba(79, 216, 255, 0.45);
+  --font: "Trebuchet MS", "Segoe UI", Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  background: radial-gradient(circle at 50% 30%, #0b2f5c 0%, var(--navy-900) 70%);
+  color: var(--text);
+  font-family: var(--font);
+  overflow: hidden;
+}
+
+.app {
+  display: grid;
+  place-items: center;
+  width: 100vw;
+  height: 100vh;
+  padding: 8px;
+}
+
+/* Área do jogo: sempre 16:9, o maior possível dentro da janela, sem distorcer. */
+.game-container {
+  position: relative;
+  width: min(100vw - 16px, (100vh - 16px) * 16 / 9);
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 0 0 2px var(--panel-border), 0 18px 50px rgba(0, 0, 0, 0.6);
+  container-type: inline-size; /* permite unidades cqw proporcionais à largura do jogo */
+  outline: none;
+}
+
+#game-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--navy-800);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.sr-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---------- HUD ---------- */
+
+.hud {
+  position: absolute;
+  inset: 0 0 auto 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 0.6cqw;
+  padding: 1cqw;
+  font-size: clamp(10px, 1.55cqw, 18px);
+  pointer-events: none;
+}
+
+.hud-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6cqw;
+  align-items: center;
+}
+
+.hud-panel {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.35em 0.75em;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 0.6em;
+  white-space: nowrap;
+}
+
+.hud-label {
+  color: var(--text-muted);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.85em;
+}
+
+.hearts {
+  letter-spacing: 0.1em;
+  font-size: 1.2em;
+  line-height: 1;
+}
+
+.heart {
+  color: #ff4d6a;
+  text-shadow: 0 0 4px rgba(255, 77, 106, 0.6);
+}
+
+.heart.lost {
+  color: transparent;
+  -webkit-text-stroke: 1px #7d8fa8;
+  text-shadow: none;
+}
+
+.oxygen-bar {
+  width: 9em;
+  height: 0.8em;
+  border: 1px solid var(--cyan);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+
+.oxygen-fill {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #17b5e0, var(--turquoise));
+  border-radius: inherit;
+}
+
+.oxygen-text {
+  min-width: 2.8em;
+  text-align: right;
+}
+
+.hud.oxygen-low .oxygen-fill {
+  background: linear-gradient(90deg, #ff4d6a, var(--orange));
+}
+
+.hud.oxygen-low .hud-oxygen {
+  animation: alert-blink 0.8s ease-in-out infinite;
+}
+
+@keyframes alert-blink {
+  50% {
+    border-color: var(--coral);
+    box-shadow: 0 0 10px rgba(255, 107, 122, 0.7);
+  }
+}
+
+.accent {
+  color: var(--yellow);
+}
+
+.done {
+  color: var(--green);
+}
+
+.hud-pause {
+  pointer-events: auto;
+  font: inherit;
+  font-weight: bold;
+  color: var(--text);
+  padding: 0.35em 0.8em;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 0.6em;
+  cursor: pointer;
+}
+
+.hud-pause:hover,
+.hud-pause:focus-visible {
+  background: var(--navy-700);
+  border-color: var(--yellow);
+  outline: none;
+}
+
+/* ---------- Overlays e painéis ---------- */
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 2cqw;
+  font-size: clamp(12px, 1.7cqw, 19px);
+  background: rgba(2, 10, 28, 0.35);
+}
+
+.overlay-dim {
+  background: rgba(2, 10, 28, 0.6);
+}
+
+.panel {
+  max-width: min(92%, 34em);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 1.4em 2em;
+  text-align: center;
+  background: var(--panel-bg);
+  border: 2px solid var(--panel-border);
+  border-radius: 1em;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.panel-wide {
+  max-width: min(94%, 46em);
+  text-align: left;
+}
+
+.panel-wide h2 {
+  text-align: center;
+}
+
+.panel-menu {
+  max-width: min(92%, 40em);
+  overflow-x: hidden;
+  background: rgba(4, 18, 44, 0.72);
+}
+
+h2 {
+  margin: 0 0 0.6em;
+  color: var(--cyan);
+  font-size: 1.7em;
+  letter-spacing: 0.03em;
+}
+
+p {
+  margin: 0.5em 0;
+  line-height: 1.4;
+}
+
+.game-title {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.title-small {
+  font-size: 1.3em;
+  color: var(--text);
+  letter-spacing: 0.12em;
+}
+
+.title-big {
+  font-size: 3em;
+  color: var(--cyan);
+  letter-spacing: 0.04em;
+  text-shadow: 0 4px 0 #0a4f8f, 0 0 24px rgba(79, 216, 255, 0.5);
+}
+
+.title-ribbon {
+  margin-top: 0.4em;
+  padding: 0.3em 1em;
+  font-size: 1em;
+  color: #3b2200;
+  background: linear-gradient(180deg, var(--yellow), var(--orange));
+  border-radius: 0.4em;
+  letter-spacing: 0.08em;
+}
+
+.tagline {
+  color: var(--text-muted);
+  margin: 1em 0;
+}
+
+.button-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6em;
+  margin-top: 1em;
+}
+
+.btn {
+  min-width: 11em;
+  padding: 0.6em 1.4em;
+  font: inherit;
+  font-weight: bold;
+  color: var(--text);
+  background: linear-gradient(180deg, #1665b8, #0b3f7d);
+  border: 2px solid var(--cyan);
+  border-radius: 0.6em;
+  cursor: pointer;
+  transition: transform 0.1s, background 0.15s, box-shadow 0.15s;
+}
+
+.btn-primary {
+  color: #062008;
+  background: linear-gradient(180deg, #7ee86a, #34b04a);
+  border-color: #c8ffbe;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 0 14px rgba(79, 216, 255, 0.6);
+}
+
+.btn:focus-visible {
+  outline: 3px solid var(--yellow);
+  outline-offset: 3px;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.loading-status {
+  min-height: 1.4em;
+  color: var(--text-muted);
+  font-size: 0.9em;
+}
+
+.instruction-list {
+  list-style: none;
+  margin: 0 0 0.8em;
+  padding: 0;
+  display: grid;
+  gap: 0.7em;
+}
+
+.instruction-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  line-height: 1.35;
+}
+
+.instruction-list img {
+  flex: none;
+  height: 1.9em;
+  width: auto;
+}
+
+.keys {
+  flex: none;
+  color: var(--text-muted);
+}
+
+kbd {
+  display: inline-block;
+  min-width: 1.6em;
+  margin: 0 0.1em;
+  padding: 0.1em 0.35em;
+  font-family: inherit;
+  font-weight: bold;
+  text-align: center;
+  color: var(--text);
+  background: var(--navy-700);
+  border: 1px solid var(--cyan);
+  border-bottom-width: 3px;
+  border-radius: 0.3em;
+}
+
+.note {
+  color: var(--text-muted);
+  font-size: 0.9em;
+}
+
+.panel-wide .btn {
+  display: block;
+  margin: 0.6em auto 0;
+}
+
+.credits-list {
+  margin: 0 0 1em;
+}
+
+.credits-list dt {
+  color: var(--cyan);
+  font-weight: bold;
+  margin-top: 0.6em;
+}
+
+.credits-list dd {
+  margin: 0.2em 0 0;
+}
+
+.result-title {
+  font-size: 2.4em;
+  text-transform: uppercase;
+}
+
+.result-title.victory {
+  color: var(--green);
+}
+
+.result-title.defeat {
+  color: var(--coral);
+}
+
+.final-score {
+  font-size: 1.3em;
+}
+
+.final-score strong {
+  color: var(--yellow);
+  font-size: 1.3em;
+}
+
+.panel-victory {
+  border-color: rgba(141, 255, 122, 0.6);
+}
+
+/* Tela final (última fase concluída): destaque dourado e entrada animada */
+.panel-final {
+  border-color: rgba(255, 216, 77, 0.75);
+  box-shadow: 0 0 40px rgba(255, 216, 77, 0.25);
+  animation: final-pop 0.6s ease-out;
+}
+
+.final-badge {
+  margin: 0;
+  font-size: 2em;
+  letter-spacing: 0.2em;
+}
+
+.final-title span {
+  display: block;
+}
+
+.final-congrats {
+  color: var(--green);
+}
+
+.final-clean {
+  font-size: 0.75em;
+  color: #5ff4ff;
+}
+
+@keyframes final-pop {
+  from { transform: scale(0.85); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-final { animation: none; }
+}
+
+/* Telas baixas: esconde os ícones para a tela final caber sem rolagem */
+@media (max-height: 420px) {
+  .final-badge { display: none; }
+  .panel-final .note { display: none; }
+}
+
+.panel-defeat {
+  border-color: rgba(255, 107, 122, 0.6);
+}

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="44" height="80" viewBox="0 0 44 80">
+  <!-- Garrafa plástica original -->
+  <rect x="15" y="2" width="14" height="10" rx="2" fill="#2e7de0" stroke="#123f7a" stroke-width="2"/>
+  <path d="M15 12 L29 12 L34 24 L34 74 Q34 78 30 78 L14 78 Q10 78 10 74 L10 24 Z"
+        fill="#cdeeff" fill-opacity="0.85" stroke="#5a8fb8" stroke-width="2.5"/>
+  <rect x="10" y="38" width="24" height="16" fill="#3fa0ff"/>
+  <path d="M15 28 L15 70" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+</svg>
